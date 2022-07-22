@@ -5,16 +5,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.lang.Math.abs;
 
 public class LazyThread extends Thread {
+    private static final int minSleepTime = 1000;
+    private static final int maxSleepTime = 2000;
     static final AtomicInteger trans = new AtomicInteger(0);
     private final HashMap<String, Account> accountHashMap;
     private final Manager manager;
+    private final int maxTransCount;
 
     String threadName;
 
-    public LazyThread(HashMap<String, Account> accountHashMap, String name, Manager manager) {
+    public LazyThread(HashMap<String, Account> accountHashMap, String name, Manager manager, int maxTransCount) {
         this.accountHashMap = accountHashMap;
         this.threadName = name;
         this.manager = manager;
+        this.maxTransCount = maxTransCount;
     }
 
     // TODO: is it correct? Static?!
@@ -31,17 +35,16 @@ public class LazyThread extends Thread {
         while (true) {
 
             try {
-                int randomSleepTime = random.nextInt(1000, 2001);
+                int randomSleepTime = random.nextInt(minSleepTime, maxSleepTime + 1);
                 System.out.println(this.getName() + " going for sleep " + randomSleepTime + "ms");
                 Thread.sleep(randomSleepTime);
             } catch (InterruptedException e) {
                 System.out.println("Thread " + this.getName() + " interrupted.");
             }
 
-            if (trans.intValue() >= 5) {
-                System.out.println("Trans >= 5. " + this.getName() + " is exiting.");
-//                this.interrupt();
-                //todo обработай exit
+            if (trans.intValue() >= maxTransCount) {
+                System.out.println("Trans >= " + maxTransCount + ". " + this.getName() + " is exiting.");
+
                 return;
             }
 
@@ -61,17 +64,18 @@ public class LazyThread extends Thread {
 
             //TODO: do smth with ID
             while (!manager.askTransaction((int) this.getId(), accountTo, accountFrom)) {
-                //TODO: DELETE THIS. (Useless stuff)
+                //TODO: Delete this stuff (used for tests only)
                 try {
                     Thread.sleep(50);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
+                //Помни про Thread.yield; (Вряд ли подойдёт, но мало ли)
             }
 
             printAccountsState();
 
-            //Doing some work and unlock
+            //Doing some work and unlock accounts
             System.out.println(money + " money from " + from + " to " + to);
 
             if (money > accountFrom.getMoney()) {
@@ -88,6 +92,7 @@ public class LazyThread extends Thread {
             accountFrom.setMoney(accountFrom.getMoney() - money);
             accountTo.setMoney(accountTo.getMoney() + money);
 
+            //TODO: Delete this stuff (used for tests only)
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
@@ -95,7 +100,7 @@ public class LazyThread extends Thread {
             }
 
             synchronized (trans) {
-                if (trans.intValue() < 5) {
+                if (trans.intValue() < maxTransCount) {
 
                     trans.incrementAndGet();
                     accountFrom.unlock();
@@ -107,8 +112,6 @@ public class LazyThread extends Thread {
                     accountFrom.setMoney(accountFrom.getMoney() + money);
                     accountTo.setMoney(accountTo.getMoney() - money);
 
-//                    this.interrupt();
-                    //todo обработай exit
                     return;
                 }
             }

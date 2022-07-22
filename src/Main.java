@@ -16,6 +16,9 @@ public class Main {
         int numOfThreads;
         numOfThreads = 2;
 
+        int maxTransCount;
+        maxTransCount = 5;
+
         HashMap<String, Account> accountsMap = new HashMap<>();
         Manager manager = new Manager();
 
@@ -34,7 +37,7 @@ public class Main {
         System.out.println();
 
         for (int i = 0; i < numOfThreads; i++){
-            LazyThread tmpThread = new LazyThread(accountsMap, "Thread-"+i, manager);
+            LazyThread tmpThread = new LazyThread(accountsMap, "Thread-"+i, manager, maxTransCount);
             tmpThread.start();
         }
 
