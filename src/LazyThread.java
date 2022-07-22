@@ -6,21 +6,22 @@ import static java.lang.Math.abs;
 
 public class LazyThread extends Thread{
     static final AtomicInteger trans = new AtomicInteger(0);
-    static final HashMap<String, Account> accountHashMap = new HashMap<>();
-
+    private final HashMap<String, Account> accountHashMap;
     //TODO: Wtf iz dat thread?
+
     private Thread t;
-    private Manager manager;
+    private final Manager manager;
 
 
     String threadName;
-    public LazyThread(String name, Manager manager) {
+    public LazyThread(HashMap<String, Account> accountHashMap, String name, Manager manager) {
+        this.accountHashMap = accountHashMap;
         this.threadName = name;
         this.manager = manager;
     }
 
     // TODO: is it correct? Static?!
-    public static void printAccountsState(){
+    public void printAccountsState(){
         System.out.println("========== Current State:");
         accountHashMap.values().forEach(acc -> System.out.println("key: "+acc.getId()+" money: "+acc.getMoney()));
         System.out.println();
