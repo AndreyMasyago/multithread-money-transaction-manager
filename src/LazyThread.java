@@ -21,7 +21,6 @@ public class LazyThread extends Thread {
         this.maxTransCount = maxTransCount;
     }
 
-    // TODO: is it correct? Static?!
     public void printAccountsState() {
         System.out.println("========== Current State:");
         accountHashMap.values().forEach(acc -> System.out.println("key: " + acc.getId() + " money: " + acc.getMoney()));
@@ -30,20 +29,20 @@ public class LazyThread extends Thread {
 
     @Override
     public void run() {
-        System.out.println("Running " + this.getName() + " Thread");
+        System.out.println("Running " + this.threadName + " Thread");
         Random random = new Random();
         while (true) {
 
             try {
                 int randomSleepTime = random.nextInt(minSleepTime, maxSleepTime + 1);
-                System.out.println(this.getName() + " going for sleep " + randomSleepTime + "ms");
+                System.out.println(this.threadName + " going for sleep " + randomSleepTime + "ms");
                 Thread.sleep(randomSleepTime);
             } catch (InterruptedException e) {
-                System.out.println("Thread " + this.getName() + " interrupted.");
+                System.out.println("Thread " + this.threadName + " interrupted.");
             }
 
             if (trans.intValue() >= maxTransCount) {
-                System.out.println("Trans >= " + maxTransCount + ". " + this.getName() + " is exiting.");
+                System.out.println("Trans >= " + maxTransCount + ". " + this.threadName + " is exiting.");
 
                 return;
             }

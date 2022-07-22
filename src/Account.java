@@ -1,4 +1,5 @@
 public class Account {
+    private static final int defaultStartingMoney = 10000;
     private String id;
     private Integer money;
     private boolean isLocked;
@@ -23,7 +24,7 @@ public class Account {
 
     public Account(String id) {
         this.id = id;
-        this.money = 10000;
+        this.money = defaultStartingMoney;
         this.isLocked = false;
     }
 
