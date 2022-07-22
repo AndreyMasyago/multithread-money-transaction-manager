@@ -4,16 +4,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Math.abs;
 
-public class LazyThread extends Thread{
+public class LazyThread extends Thread {
     static final AtomicInteger trans = new AtomicInteger(0);
     private final HashMap<String, Account> accountHashMap;
-    //TODO: Wtf iz dat thread?
-
-    private Thread t;
     private final Manager manager;
 
-
     String threadName;
+
     public LazyThread(HashMap<String, Account> accountHashMap, String name, Manager manager) {
         this.accountHashMap = accountHashMap;
         this.threadName = name;
@@ -21,28 +18,28 @@ public class LazyThread extends Thread{
     }
 
     // TODO: is it correct? Static?!
-    public void printAccountsState(){
+    public void printAccountsState() {
         System.out.println("========== Current State:");
-        accountHashMap.values().forEach(acc -> System.out.println("key: "+acc.getId()+" money: "+acc.getMoney()));
+        accountHashMap.values().forEach(acc -> System.out.println("key: " + acc.getId() + " money: " + acc.getMoney()));
         System.out.println();
     }
 
     @Override
-    public void run () {
-        System.out.println("Running " + t.getName() + " Thread");
+    public void run() {
+        System.out.println("Running " + this.getName() + " Thread");
         Random random = new Random();
         while (true) {
 
             try {
                 int randomSleepTime = random.nextInt(1000, 2001);
-                System.out.println(t.getName() + " going for sleep " + randomSleepTime + "ms");
+                System.out.println(this.getName() + " going for sleep " + randomSleepTime + "ms");
                 Thread.sleep(randomSleepTime);
             } catch (InterruptedException e) {
-                System.out.println("Thread " + t.getName() + " interrupted.");
+                System.out.println("Thread " + this.getName() + " interrupted.");
             }
 
             if (trans.intValue() >= 5) {
-                System.out.println("Trans >= 5. " + t.getName() + " is exiting." );
+                System.out.println("Trans >= 5. " + this.getName() + " is exiting.");
 //                this.interrupt();
                 //todo обработай exit
                 return;
@@ -51,7 +48,7 @@ public class LazyThread extends Thread{
             int accountsCount = accountHashMap.size();
 
             int money = abs(random.nextInt() % 10000);
-            int from = random.nextInt(0,accountsCount);
+            int from = random.nextInt(0, accountsCount);
 
             int to = 0;
             do {
@@ -63,7 +60,7 @@ public class LazyThread extends Thread{
 
 
             //TODO: do smth with ID
-            while (!manager.askTransaction((int) t.getId(), accountTo, accountFrom)) {
+            while (!manager.askTransaction((int) this.getId(), accountTo, accountFrom)) {
                 //TODO: DELETE THIS. (Useless stuff)
                 try {
                     Thread.sleep(50);
@@ -77,8 +74,7 @@ public class LazyThread extends Thread{
             //Doing some work and unlock
             System.out.println(money + " money from " + from + " to " + to);
 
-            if (money > accountFrom.getMoney())
-            {
+            if (money > accountFrom.getMoney()) {
                 System.out.println("Not enough money for transaction");
                 System.out.println("Asking: " + money + ". At " + from + "th account " + accountFrom.getMoney());
 
@@ -94,19 +90,17 @@ public class LazyThread extends Thread{
 
             try {
                 Thread.sleep(500);
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
 
-            synchronized (trans){
-                if (trans.intValue() < 5){
+            synchronized (trans) {
+                if (trans.intValue() < 5) {
 
                     trans.incrementAndGet();
                     accountFrom.unlock();
                     accountTo.unlock();
-                }
-                else{
+                } else {
                     System.out.println("ROLLBACK");
                     System.out.println(money + " money from " + to + " from " + from);
 
@@ -118,14 +112,6 @@ public class LazyThread extends Thread{
                     return;
                 }
             }
-        }
-    }
-
-    public void start () {
-        System.out.println("Starting thread");
-        if (t == null) {
-            t = new Thread(this);
-            t.start();
         }
     }
 }
