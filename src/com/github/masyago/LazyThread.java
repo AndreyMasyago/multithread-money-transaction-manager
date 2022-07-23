@@ -1,3 +1,5 @@
+package com.github.masyago;
+
 import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -62,7 +64,7 @@ public class LazyThread extends Thread {
 
 
             //TODO: do smth with ID
-            while (!manager.askTransaction((int) this.getId(), accountTo, accountFrom)) {
+            while (!manager.askTransaction(this.threadName, accountTo, accountFrom)) {
                 //TODO: Delete this stuff (used for tests only)
                 try {
                     Thread.sleep(50);
@@ -83,8 +85,7 @@ public class LazyThread extends Thread {
 
                 printAccountsState();
 
-                accountTo.unlock();
-                accountFrom.unlock();
+                manager.unlockResources(this.threadName, accountTo, accountFrom);
                 continue;
             }
 
@@ -102,8 +103,7 @@ public class LazyThread extends Thread {
                 if (trans.intValue() < maxTransCount) {
 
                     trans.incrementAndGet();
-                    accountFrom.unlock();
-                    accountTo.unlock();
+                    manager.unlockResources(this.threadName, accountTo, accountFrom);
                 } else {
                     System.out.println("ROLLBACK");
                     System.out.println(money + " money from " + to + " from " + from);

@@ -1,5 +1,6 @@
+package com.github.masyago;
+
 import java.util.HashMap;
-import java.util.Random;
 import java.util.UUID;
 
 
@@ -11,10 +12,10 @@ public class Main {
     public static void main(String[] args) {
 
         int numOfAccounts;
-        numOfAccounts = 6;
+        numOfAccounts = 2;
 
         int numOfThreads;
-        numOfThreads = 2;
+        numOfThreads = 3;
 
         int maxTransCount;
         maxTransCount = 5;

@@ -1,6 +1,8 @@
+package com.github.masyago;
+
 public class Account {
     private static final int defaultStartingMoney = 10000;
-    private String id;
+    private final String id;
     private Integer money;
     private boolean isLocked;
 
