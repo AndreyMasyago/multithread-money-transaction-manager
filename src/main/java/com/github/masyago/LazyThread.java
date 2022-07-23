@@ -1,11 +1,14 @@
 package com.github.masyago;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Math.abs;
 
+@Slf4j
 public class LazyThread extends Thread {
     //TODO: Refactor naming at constants
     private static final int minSleepTime = 1000;
