@@ -1,29 +1,38 @@
 package com.github.masyago;
 
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
 public class Manager {
-    synchronized public boolean askTransaction(String threadName, Account fromAcc, Account toAcc){
-        System.out.println("Request from " + threadName + ": From  " + fromAcc.getId() + " to " + toAcc.getId());
-        while (fromAcc.isLocked() || toAcc.isLocked()){
-            try{
-                wait();
-                System.out.println("AA-a-a-a-a");
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+    ReentrantLock locker = new ReentrantLock();
+    Condition condition = locker.newCondition();
+
+    public void askTransaction(String threadName, Account fromAcc, Account toAcc) {
+        locker.lock();
+        try {
+            System.out.println("Request from " + threadName + ": From  " + fromAcc.getId() + " to " + toAcc.getId());
+            while (fromAcc.isLocked() || toAcc.isLocked()) {
+                condition.await();
             }
+
+            fromAcc.lock();
+            toAcc.lock();
+
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            locker.unlock();
         }
-
-
-        fromAcc.lock();
-        toAcc.lock();
-
-
-        return true;
     }
 
-    //TODO: Lock and conditions usage?
-    synchronized public void unlockResources(String threadName, Account fromAcc, Account toAcc){
+    //TODO: Is locker.lock needed?
+    public void unlockResources(String threadName, Account fromAcc, Account toAcc) {
+        locker.lock();
+
         fromAcc.unlock();
         toAcc.unlock();
-        notifyAll();
+        condition.signalAll();
+
+        locker.unlock();
     }
 }

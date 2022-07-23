@@ -7,8 +7,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.lang.Math.abs;
 
 public class LazyThread extends Thread {
+    //TODO: Refactor naming at constants
     private static final int minSleepTime = 1000;
     private static final int maxSleepTime = 2000;
+    private static final int maxMoneyPerTransaction = 1000;
     static final AtomicInteger trans = new AtomicInteger(0);
     private final HashMap<String, Account> accountHashMap;
     private final Manager manager;
@@ -51,7 +53,7 @@ public class LazyThread extends Thread {
 
             int accountsCount = accountHashMap.size();
 
-            int money = abs(random.nextInt() % 10000);
+            int money = abs(random.nextInt() % maxMoneyPerTransaction);
             int from = random.nextInt(0, accountsCount);
 
             int to = 0;
@@ -62,26 +64,17 @@ public class LazyThread extends Thread {
             Account accountTo = accountHashMap.get(accountHashMap.keySet().stream().toList().get(to));
             Account accountFrom = accountHashMap.get(accountHashMap.keySet().stream().toList().get(from));
 
-
-            //TODO: do smth with ID
-            while (!manager.askTransaction(this.threadName, accountTo, accountFrom)) {
-                //TODO: Delete this stuff (used for tests only)
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                //Помни про Thread.yield; (Вряд ли подойдёт, но мало ли)
-            }
+            //TODO: It's void sync method
+            manager.askTransaction(this.threadName, accountFrom, accountTo);
 
             printAccountsState();
 
             //Doing some work and unlock accounts
-            System.out.println(money + " money from " + from + " to " + to);
+            System.out.println(money + " money from " + accountFrom.getId() + " to " + accountTo.getId());
 
             if (money > accountFrom.getMoney()) {
                 System.out.println("Not enough money for transaction");
-                System.out.println("Asking: " + money + ". At " + from + "th account " + accountFrom.getMoney());
+                System.out.println("Asking: " + money + ". At " + accountFrom.getId() + "th account " + accountFrom.getMoney());
 
                 printAccountsState();
 
@@ -106,7 +99,7 @@ public class LazyThread extends Thread {
                     manager.unlockResources(this.threadName, accountTo, accountFrom);
                 } else {
                     System.out.println("ROLLBACK");
-                    System.out.println(money + " money from " + to + " from " + from);
+                    System.out.println(money + " money from " + accountTo.getId() + " to " + accountFrom.getId());
 
                     accountFrom.setMoney(accountFrom.getMoney() + money);
                     accountTo.setMoney(accountTo.getMoney() - money);
