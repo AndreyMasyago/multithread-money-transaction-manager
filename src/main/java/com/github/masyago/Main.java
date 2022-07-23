@@ -24,7 +24,7 @@ public class Main {
         maxTransCount = 6;
 
         HashMap<String, Account> accountsMap = new HashMap<>();
-        Manager manager = new Manager();
+        AccountManager accountManager = new AccountManager();
 
         for (int i = 0; i < numOfAccounts; i++) {
             String generatedString;
@@ -39,7 +39,7 @@ public class Main {
 
 
         for (int i = 0; i < numOfThreads; i++) {
-            LazyThread tmpThread = new LazyThread("Thread-" + i, accountsMap, manager, maxTransCount);
+            TransactionManager tmpThread = new TransactionManager("Thread-" + i, accountsMap, accountManager, maxTransCount);
             log.debug("Thread {} created", tmpThread.getName());
             tmpThread.start();
         }

@@ -11,7 +11,7 @@ import static java.lang.Math.abs;
 
 @Slf4j
 @AllArgsConstructor
-public class LazyThread extends Thread {
+public class TransactionManager extends Thread {
     private static final int MIN_SLEEP_TIME = 1000;
     private static final int MAX_SLEEP_TIME = 2000;
     private static final int MAX_MONEY_PER_TRANSACTION = 1000;
@@ -19,7 +19,7 @@ public class LazyThread extends Thread {
 
     private final String threadName;
     private final HashMap<String, Account> accountsHashMap;
-    private final Manager manager;
+    private final AccountManager accountManager;
     private final int maxTransactionsCount;
 /*
 //  USAGE: for tests only
@@ -63,7 +63,7 @@ public class LazyThread extends Thread {
             Account accountTo = accountsHashMap.get(accountsHashMap.keySet().stream().toList().get(to));
             Account accountFrom = accountsHashMap.get(accountsHashMap.keySet().stream().toList().get(from));
 
-            manager.askTransaction(this.threadName, accountFrom, accountTo);
+            accountManager.askResources(this.threadName, accountFrom, accountTo);
 
 //            USAGE: for tests only
 //            printAccountsState();
@@ -74,7 +74,7 @@ public class LazyThread extends Thread {
 //            USAGE: for tests only
 //            printAccountsState();
 
-                manager.unlockResources(this.threadName, accountTo, accountFrom);
+                accountManager.unlockResources(this.threadName, accountTo, accountFrom);
                 continue;
             }
 
@@ -97,14 +97,14 @@ public class LazyThread extends Thread {
                 if (transactionCounter.intValue() < maxTransactionsCount) {
 
                     transactionCounter.incrementAndGet();
-                    manager.unlockResources(this.threadName, accountTo, accountFrom);
+                    accountManager.unlockResources(this.threadName, accountTo, accountFrom);
                 } else {
                     log.info("ROLLBACK transaction: {} money from {} to {}", money, accountTo.getId(), accountFrom.getId());
 
                     accountFrom.putMoney(money);
                     accountTo.withdrawMoney(money);
 
-                    manager.unlockResources(this.threadName, accountTo, accountFrom);
+                    accountManager.unlockResources(this.threadName, accountTo, accountFrom);
 
                     log.debug("Thread {} exiting. Reached maximum of transactionsCount = {}", this.threadName, maxTransactionsCount);
                     return;

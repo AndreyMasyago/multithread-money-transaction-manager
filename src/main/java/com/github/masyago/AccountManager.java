@@ -6,11 +6,11 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
-public class Manager {
+public class AccountManager {
     private final ReentrantLock locker = new ReentrantLock();
     private final Condition condition = locker.newCondition();
 
-    public void askTransaction(String threadName, Account fromAcc, Account toAcc) {
+    public void askResources(String threadName, Account fromAcc, Account toAcc) {
         locker.lock();
         try {
             log.debug("Thread {} requested access to {}, {} accounts for transaction ", threadName, fromAcc.getId(), toAcc.getId());
