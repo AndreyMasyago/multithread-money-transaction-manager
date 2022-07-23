@@ -1,6 +1,8 @@
 package com.github.masyago;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -37,13 +39,28 @@ public class Main {
         accountsMap.values().forEach(acc -> System.out.println("key: "+acc.getId()+" money: "+acc.getMoney()));
         System.out.println();
 
+        List<LazyThread> listOfThreads = new ArrayList<>();
+
         for (int i = 0; i < numOfThreads; i++){
             LazyThread tmpThread = new LazyThread(accountsMap, "Thread-"+i, manager, maxTransCount);
+            listOfThreads.add(tmpThread);
             tmpThread.start();
         }
 
+        listOfThreads.forEach(lazyThread -> {
+            try {
+                lazyThread.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
 //        Пока кто-то жив: жди
 //        Все ммертвы - пиши "Пока - пока"
+
+        System.out.println("\nFinal State:\n");
+        accountsMap.values().forEach(acc -> System.out.println("key: " + acc.getId() + " money: " + acc.getMoney()));
+        System.out.println();
 
         return;
         }
