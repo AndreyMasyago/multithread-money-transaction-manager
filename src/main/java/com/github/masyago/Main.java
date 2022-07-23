@@ -14,14 +14,19 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        ArgumentParser argumentParser = new ArgumentParser();
+        Settings settings = argumentParser.parse(args);
+        log.debug("Application settings: numberOfAccounts {}, numberOfThreads {}, maxTransactionCount {}",
+                settings.getNumOfAccounts(), settings.getNumOfThreads(), settings.getMaxTransCount());
+
         int numOfAccounts;
-        numOfAccounts = 6;
+        numOfAccounts = settings.getNumOfAccounts();
 
         int numOfThreads;
-        numOfThreads = 5;
+        numOfThreads = settings.getNumOfThreads();
 
         int maxTransCount;
-        maxTransCount = 6;
+        maxTransCount = settings.getMaxTransCount();
 
         HashMap<String, Account> accountsMap = new HashMap<>();
         AccountManager accountManager = new AccountManager();
