@@ -1,8 +1,11 @@
 package com.github.masyago;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+@Slf4j
 public class Manager {
     ReentrantLock locker = new ReentrantLock();
     Condition condition = locker.newCondition();
@@ -10,10 +13,12 @@ public class Manager {
     public void askTransaction(String threadName, Account fromAcc, Account toAcc) {
         locker.lock();
         try {
-            System.out.println("Request from " + threadName + ": From  " + fromAcc.getId() + " to " + toAcc.getId());
+            log.debug("Thread {} requested access to {}, {} accounts for transaction ", threadName, fromAcc.getId(), toAcc.getId());
             while (fromAcc.isLocked() || toAcc.isLocked()) {
+                log.debug("Thread {} waiting access to {}, {} accounts for transaction ", threadName, fromAcc.getId(), toAcc.getId());
                 condition.await();
             }
+            log.debug("Thread {} got access to {}, {} accounts for transaction ", threadName, fromAcc.getId(), toAcc.getId());
 
             fromAcc.lock();
             toAcc.lock();

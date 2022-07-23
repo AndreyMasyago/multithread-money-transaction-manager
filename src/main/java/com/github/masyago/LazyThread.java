@@ -38,21 +38,22 @@ public class LazyThread extends Thread {
 
     @Override
     public void run() {
-        System.out.println("Running " + this.threadName + " Thread");
+        log.debug("Thread {} started", this.getName());
+
         Random random = new Random();
+
         while (true) {
 
             try {
                 int randomSleepTime = random.nextInt(minSleepTime, maxSleepTime + 1);
-                System.out.println(this.threadName + " going for sleep " + randomSleepTime + "ms");
+                log.debug("Thread {} going to sleep for {} ms", this.threadName, randomSleepTime);
                 Thread.sleep(randomSleepTime);
             } catch (InterruptedException e) {
-                System.out.println("Thread " + this.threadName + " interrupted.");
+                log.debug("Thread {} interrupted", this.threadName);
             }
 
             if (trans.intValue() >= maxTransCount) {
-                System.out.println("Trans >= " + maxTransCount + ". " + this.threadName + " is exiting.");
-
+                log.debug("Thread {} exiting. Reached maximum of transactionsCount = {}", this.threadName, maxTransCount);
                 return;
             }
 
@@ -69,33 +70,35 @@ public class LazyThread extends Thread {
             Account accountTo = accountHashMap.get(accountHashMap.keySet().stream().toList().get(to));
             Account accountFrom = accountHashMap.get(accountHashMap.keySet().stream().toList().get(from));
 
-            //TODO: It's void sync method
             manager.askTransaction(this.threadName, accountFrom, accountTo);
 
-            printAccountsState();
-
-            //Doing some work and unlock accounts
-            System.out.println(money + " money from " + accountFrom.getId() + " to " + accountTo.getId());
+//            USAGE: for tests only
+//            printAccountsState();
 
             if (money > accountFrom.getMoney()) {
-                System.out.println("Not enough money for transaction");
-                System.out.println("Asking: " + money + ". At " + accountFrom.getId() + "th account " + accountFrom.getMoney());
-
-                printAccountsState();
+                log.info("Denied transaction: {} money from {} to {}. Not enough money: {}",
+                        money, accountFrom.getId(), accountTo.getId(), accountFrom.getMoney());
+//            USAGE: for tests only
+//            printAccountsState();
 
                 manager.unlockResources(this.threadName, accountTo, accountFrom);
                 continue;
             }
 
-            accountFrom.setMoney(accountFrom.getMoney() - money);
-            accountTo.setMoney(accountTo.getMoney() + money);
+            log.info("Accepted transaction: {} money from {} to {}",
+                    money, accountFrom.getId(), accountTo.getId());
 
-            //TODO: Delete this stuff (used for tests only)
+            accountFrom.withdrawMoney(money);
+            accountTo.putMoney(money);
+
+/*
+//            USAGE: for tests only
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+*/
 
             synchronized (trans) {
                 if (trans.intValue() < maxTransCount) {
@@ -103,12 +106,14 @@ public class LazyThread extends Thread {
                     trans.incrementAndGet();
                     manager.unlockResources(this.threadName, accountTo, accountFrom);
                 } else {
-                    System.out.println("ROLLBACK");
-                    System.out.println(money + " money from " + accountTo.getId() + " to " + accountFrom.getId());
+                    log.info("ROLLBACK transaction: {} money from {} to {}", money, accountTo.getId(), accountFrom.getId());
 
-                    accountFrom.setMoney(accountFrom.getMoney() + money);
-                    accountTo.setMoney(accountTo.getMoney() - money);
+                    accountFrom.putMoney(money);
+                    accountTo.withdrawMoney(money);
 
+                    manager.unlockResources(this.threadName, accountTo, accountFrom);
+
+                    log.debug("Thread {} exiting. Reached maximum of transactionsCount = {}", this.threadName, maxTransCount);
                     return;
                 }
             }
