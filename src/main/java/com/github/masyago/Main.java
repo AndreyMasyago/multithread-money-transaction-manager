@@ -27,7 +27,7 @@ public class Main {
         HashMap<String, Account> accountsMap = new HashMap<>();
         Manager manager = new Manager();
 
-        for (int i = 0 ; i < numOfAccounts; i++) {
+        for (int i = 0; i < numOfAccounts; i++) {
             String generatedString;
             do {
                 generatedString = generateString();
@@ -38,13 +38,13 @@ public class Main {
         }
 
         System.out.println("========== Current State:");
-        accountsMap.values().forEach(acc -> System.out.println("key: "+acc.getId()+" money: "+acc.getMoney()));
+        accountsMap.values().forEach(acc -> System.out.println("key: " + acc.getId() + " money: " + acc.getMoney()));
         System.out.println();
 
         List<LazyThread> listOfThreads = new ArrayList<>();
 
-        for (int i = 0; i < numOfThreads; i++){
-            LazyThread tmpThread = new LazyThread(accountsMap, "Thread-"+i, manager, maxTransCount);
+        for (int i = 0; i < numOfThreads; i++) {
+            LazyThread tmpThread = new LazyThread("Thread-" + i, accountsMap, manager, maxTransCount);
             listOfThreads.add(tmpThread);
             tmpThread.start();
         }
@@ -65,6 +65,6 @@ public class Main {
         System.out.println();
 
         return;
-        }
-
     }
+
+}

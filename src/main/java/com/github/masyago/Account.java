@@ -30,15 +30,15 @@ public class Account {
         this.isLocked = false;
     }
 
-    void lock(){
+    void lock() {
         this.isLocked = true;
     }
 
-    void unlock(){
+    void unlock() {
         this.isLocked = false;
     }
 
-    boolean isLocked(){
+    boolean isLocked() {
         return this.isLocked;
     }
 }

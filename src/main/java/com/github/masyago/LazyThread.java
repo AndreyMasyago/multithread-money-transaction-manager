@@ -1,5 +1,6 @@
 package com.github.masyago;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
@@ -9,24 +10,25 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.lang.Math.abs;
 
 @Slf4j
+@AllArgsConstructor
 public class LazyThread extends Thread {
     //TODO: Refactor naming at constants
     private static final int minSleepTime = 1000;
     private static final int maxSleepTime = 2000;
     private static final int maxMoneyPerTransaction = 1000;
     static final AtomicInteger trans = new AtomicInteger(0);
+    private final String threadName;
     private final HashMap<String, Account> accountHashMap;
     private final Manager manager;
     private final int maxTransCount;
 
-    String threadName;
 
-    public LazyThread(HashMap<String, Account> accountHashMap, String name, Manager manager, int maxTransCount) {
-        this.accountHashMap = accountHashMap;
-        this.threadName = name;
-        this.manager = manager;
-        this.maxTransCount = maxTransCount;
-    }
+//    public LazyThread(HashMap<String, Account> accountHashMap, String name, Manager manager, int maxTransCount) {
+//        this.accountHashMap = accountHashMap;
+//        this.threadName = name;
+//        this.manager = manager;
+//        this.maxTransCount = maxTransCount;
+//    }
 
     public void printAccountsState() {
         System.out.println("========== Current State:");
