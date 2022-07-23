@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Account {
-    private static final int defaultStartingMoney = 10000;
+    private static final int DEFAULT_STARTING_MONEY = 10000;
     private final String id;
     private Integer money;
     private boolean isLocked;
@@ -39,7 +39,7 @@ public class Account {
 
     public Account(String id) {
         this.id = id;
-        this.money = defaultStartingMoney;
+        this.money = DEFAULT_STARTING_MONEY;
         this.isLocked = false;
     }
 

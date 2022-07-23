@@ -12,29 +12,23 @@ import static java.lang.Math.abs;
 @Slf4j
 @AllArgsConstructor
 public class LazyThread extends Thread {
-    //TODO: Refactor naming at constants
-    private static final int minSleepTime = 1000;
-    private static final int maxSleepTime = 2000;
-    private static final int maxMoneyPerTransaction = 1000;
-    static final AtomicInteger trans = new AtomicInteger(0);
+    private static final int MIN_SLEEP_TIME = 1000;
+    private static final int MAX_SLEEP_TIME = 2000;
+    private static final int MAX_MONEY_PER_TRANSACTION = 1000;
+    private static final AtomicInteger transactionCounter = new AtomicInteger(0);
+
     private final String threadName;
-    private final HashMap<String, Account> accountHashMap;
+    private final HashMap<String, Account> accountsHashMap;
     private final Manager manager;
-    private final int maxTransCount;
-
-
-//    public LazyThread(HashMap<String, Account> accountHashMap, String name, Manager manager, int maxTransCount) {
-//        this.accountHashMap = accountHashMap;
-//        this.threadName = name;
-//        this.manager = manager;
-//        this.maxTransCount = maxTransCount;
-//    }
-
+    private final int maxTransactionsCount;
+/*
+//  USAGE: for tests only
     public void printAccountsState() {
         System.out.println("========== Current State:");
-        accountHashMap.values().forEach(acc -> System.out.println("key: " + acc.getId() + " money: " + acc.getMoney()));
+        accountsHashMap.values().forEach(acc -> System.out.println("key: " + acc.getId() + " money: " + acc.getMoney()));
         System.out.println();
     }
+*/
 
     @Override
     public void run() {
@@ -43,23 +37,22 @@ public class LazyThread extends Thread {
         Random random = new Random();
 
         while (true) {
-
             try {
-                int randomSleepTime = random.nextInt(minSleepTime, maxSleepTime + 1);
+                int randomSleepTime = random.nextInt(MIN_SLEEP_TIME, MAX_SLEEP_TIME + 1);
                 log.debug("Thread {} going to sleep for {} ms", this.threadName, randomSleepTime);
                 Thread.sleep(randomSleepTime);
             } catch (InterruptedException e) {
                 log.debug("Thread {} interrupted", this.threadName);
             }
 
-            if (trans.intValue() >= maxTransCount) {
-                log.debug("Thread {} exiting. Reached maximum of transactionsCount = {}", this.threadName, maxTransCount);
+            if (transactionCounter.intValue() >= maxTransactionsCount) {
+                log.debug("Thread {} exiting. Reached maximum of transactionsCount = {}", this.threadName, maxTransactionsCount);
                 return;
             }
 
-            int accountsCount = accountHashMap.size();
+            int accountsCount = accountsHashMap.size();
 
-            int money = abs(random.nextInt() % maxMoneyPerTransaction);
+            int money = abs(random.nextInt() % MAX_MONEY_PER_TRANSACTION);
             int from = random.nextInt(0, accountsCount);
 
             int to = 0;
@@ -67,8 +60,8 @@ public class LazyThread extends Thread {
                 to = random.nextInt(0, accountsCount);
             } while (to == from);
 
-            Account accountTo = accountHashMap.get(accountHashMap.keySet().stream().toList().get(to));
-            Account accountFrom = accountHashMap.get(accountHashMap.keySet().stream().toList().get(from));
+            Account accountTo = accountsHashMap.get(accountsHashMap.keySet().stream().toList().get(to));
+            Account accountFrom = accountsHashMap.get(accountsHashMap.keySet().stream().toList().get(from));
 
             manager.askTransaction(this.threadName, accountFrom, accountTo);
 
@@ -92,7 +85,7 @@ public class LazyThread extends Thread {
             accountTo.putMoney(money);
 
 /*
-//            USAGE: for tests only
+//          USAGE: for tests only
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
@@ -100,10 +93,10 @@ public class LazyThread extends Thread {
             }
 */
 
-            synchronized (trans) {
-                if (trans.intValue() < maxTransCount) {
+            synchronized (transactionCounter) {
+                if (transactionCounter.intValue() < maxTransactionsCount) {
 
-                    trans.incrementAndGet();
+                    transactionCounter.incrementAndGet();
                     manager.unlockResources(this.threadName, accountTo, accountFrom);
                 } else {
                     log.info("ROLLBACK transaction: {} money from {} to {}", money, accountTo.getId(), accountFrom.getId());
@@ -113,7 +106,7 @@ public class LazyThread extends Thread {
 
                     manager.unlockResources(this.threadName, accountTo, accountFrom);
 
-                    log.debug("Thread {} exiting. Reached maximum of transactionsCount = {}", this.threadName, maxTransCount);
+                    log.debug("Thread {} exiting. Reached maximum of transactionsCount = {}", this.threadName, maxTransactionsCount);
                     return;
                 }
             }

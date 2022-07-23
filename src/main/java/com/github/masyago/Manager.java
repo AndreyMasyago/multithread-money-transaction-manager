@@ -7,8 +7,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
 public class Manager {
-    ReentrantLock locker = new ReentrantLock();
-    Condition condition = locker.newCondition();
+    private final ReentrantLock locker = new ReentrantLock();
+    private final Condition condition = locker.newCondition();
 
     public void askTransaction(String threadName, Account fromAcc, Account toAcc) {
         locker.lock();
@@ -30,12 +30,12 @@ public class Manager {
         }
     }
 
-    //TODO: Is locker.lock needed?
     public void unlockResources(String threadName, Account fromAcc, Account toAcc) {
         locker.lock();
 
         fromAcc.unlock();
         toAcc.unlock();
+        log.debug("Thread {} return access to {}, {} accounts", threadName, fromAcc.getId(), toAcc.getId());
         condition.signalAll();
 
         locker.unlock();
